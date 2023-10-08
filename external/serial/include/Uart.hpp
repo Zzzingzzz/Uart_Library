@@ -40,7 +40,7 @@ class Uart
         Queue_T readBuff_queue;
 
         /**
-         * @brief 串口初始化
+         * @brief 串口初始化，如果初始化失败，则会调用std::exit(1)退出程序
          * @param dev 打开串口名称
          * @return -1表示打开串口失败，其他表示打开成功
          */
