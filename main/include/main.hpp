@@ -1,5 +1,5 @@
-#ifndef MAIN_HPP
-#define MAIN_HPP
+#ifndef __MAIN_HPP
+#define __MAIN_HPP
 
 #include <iostream>
 
