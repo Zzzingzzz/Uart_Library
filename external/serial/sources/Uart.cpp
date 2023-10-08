@@ -81,12 +81,46 @@ void Uart::ShowWriteBuff()
 }
 
 /**
+ * @brief 清空writeBuff并加上头尾帧
+*/
+void Uart::ClearWriteBuff()
+{
+    /*清空*/
+    memset(writeBuff, 0, sizeof(writeBuff));
+
+    /*头帧*/
+    writeBuff[0] = '?';
+    writeBuff[1] = '!';
+
+    /*尾帧*/
+    writeBuff[uart_length-1] = '!';
+}
+
+/**
+ * @brief 使用 select 函数堵塞,监听串口文件描述符的可读事件
+*/
+void Uart::Select()
+{
+    FD_ZERO(&rfds);
+    FD_SET(fd, &rfds);
+    select(fd + 1, &rfds, NULL, NULL, NULL);
+}
+
+/**
  * @brief 将收到的串口帧加入队列
 */
-void Uart::PushreadBuffToQueue()
+void Uart::PushreadBuffToQueue(ssize_t read_length)
 {
-    for(size_t i=0; i<uart_length; i++)
-        readBuff_queue.push(readBuff[i]);
+    if(read_length == 0)
+    {
+        for(size_t i=0; i<uart_length; i++)
+            readBuff_queue.push(readBuff[i]);
+    }
+    else
+    {
+        for(size_t i=0; i<read_length; i++)
+            readBuff_queue.push(readBuff[i]);
+    }
 }
 
 /**

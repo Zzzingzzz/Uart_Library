@@ -2,6 +2,8 @@ file(GLOB_RECURSE main_srcs CONFIGURE_DEPENDS include/*.hpp sources/main.cpp)
 
 add_executable(run ${main_srcs})
 
+add_thread(run)
+
 target_include_directories(run PUBLIC include)
 target_link_libraries(run PUBLIC external)
 

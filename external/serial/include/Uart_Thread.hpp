@@ -3,7 +3,8 @@
 
 #include "Uart.hpp"
 
-#include <thread>
+#include <thread>   /*多线程*/
+#include <mutex>    /*互斥锁*/
 
 class Uart_Thread:  public Uart
 {
@@ -12,6 +13,9 @@ class Uart_Thread:  public Uart
         std::thread thread_read_uart;
         /*写串口线程*/
         std::thread thread_write_uart;
+
+        /*写串口线程锁*/
+        std::mutex mutex_write_uart;
 
         /*是否开启读串口线程*/
         bool flag_thread_read_uart = false;
@@ -54,6 +58,18 @@ class Uart_Thread:  public Uart
          * @brief 关闭写串口线程
         */
         void Disable_Thread_Write_Uart();
+
+        /**
+         * @brief 任务1发送串口模板
+         * @param X 任务1执行完毕后的数据
+        */
+        void Mission1_Send(uint32_t X);
+
+        /**
+         * @brief 任务2发送串口模板
+         * @param X 任务2执行完毕后的数据
+        */
+        void Mission2_Send(uint32_t X);
 };
 
 #endif

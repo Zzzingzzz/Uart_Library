@@ -29,6 +29,9 @@ class Uart
         /*串口编号*/
         int fd = -1; 
 
+        /*设备描述集合*/
+        fd_set rfds;
+
     public:
 
         /*写串口缓冲区*/
@@ -67,9 +70,20 @@ class Uart
         void ShowWriteBuff();
 
         /**
-         * @brief 将收到的串口帧加入队列
+         * @brief 清空writeBuff并加上头尾帧
         */
-        void PushreadBuffToQueue();
+        void ClearWriteBuff();
+
+        /**
+         * @brief 使用 select 函数堵塞,监听串口文件描述符的可读事件
+        */
+        void Select();
+
+        /**
+         * @brief 将收到的串口帧加入队列
+         * @param read_length 读到的串口数据长度，默认为0则把所有readBuff加入队列
+        */
+        void PushreadBuffToQueue(ssize_t read_length = 0);
 
         /**
          * @brief 从队列中提取对齐好的数据

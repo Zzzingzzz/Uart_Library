@@ -13,27 +13,39 @@ void Uart_Thread::Thread_Read_Uart()
             break;
         }
 
+        /*使用 select 函数堵塞，监听串口文件描述符的可读事件*/
+        Select();
+
         /*堵塞读取串口*/
-        ReadBuffer();
+        ssize_t read_length = ReadBuffer();
+
+        printf("read length %ld\n", read_length);
 
         /*读取到串口后将数据送入队列*/
-        PushreadBuffToQueue();
+        PushreadBuffToQueue(read_length);
 
         /*从队列从获取正确的数据*/
         uint8_t aligned_data[uart_length] = {0};
         if(GetAlignedFromQueue(aligned_data) != -1)
         {
             /*从队列中获取正确的数据成功*/
-            if(aligned_data[2] == 'S')
+            if(aligned_data[2] == 0x01)
             {
-                uint8_t flag1 = aligned_data[3];
-                uint8_t flag2 = aligned_data[8];
-                uint16_t X=0, Y=0;
-                memcpy(&X, &aligned_data[4], 2);
-                memcpy(&Y, &aligned_data[6], 2);
-
-                printf("flag1 %d X %d Y %d flag2 %d\n", flag1, X, Y, flag2);
-
+                /*任务1*/
+                printf("Receive Mission 1:\n");
+                ShowReadBuff();
+                uint32_t X=0;
+                memcpy(&X, &aligned_data[3], 4);
+                printf("X:%d\n", X);
+            }
+            else if(aligned_data[2] == 0x02)
+            {
+                /*任务2*/
+                printf("Receive Mission 2:\n");
+                ShowReadBuff();
+                uint32_t X=0;
+                memcpy(&X, &aligned_data[4], 4);
+                printf("X:%d\n", X);
             }
         }
         else
@@ -63,22 +75,23 @@ void Uart_Thread::Thread_Write_Uart()
             break;
         }
 
-        memset(writeBuff, 0, sizeof(writeBuff));
+        /*清空写串口缓冲区*/
+        ClearWriteBuff();
 
-        writeBuff[0] = '?';
-        writeBuff[1] = '!';
+        /*为写串口缓冲区赋值*/
         writeBuff[2] = 0x01;
-        writeBuff[uart_length-1] = '!';
 
         X++;
         memcpy(&writeBuff[3], &X, 4);
 
-        // 写入串口
+        /*给写入串口进行上锁保护，并写入串口*/
+        std::lock_guard<std::mutex> res_lock_write_uart(mutex_write_uart);
         WriteBuffer();
+
         ShowWriteBuff();
 
         // 休眠100ms
-        usleep(10000);
+        usleep(100000);
     }
 }
 
@@ -116,4 +129,44 @@ void Uart_Thread::Disable_Thread_Read_Uart()
 void Uart_Thread::Disable_Thread_Write_Uart()
 {
     flag_thread_write_uart = false;
+}
+
+/**
+ * @brief 任务1发送串口模板
+*/
+void Uart_Thread::Mission1_Send(uint32_t X)
+{
+    /*清空写串口缓冲区*/
+    ClearWriteBuff();
+
+    /*为写串口缓冲区赋值*/
+    writeBuff[2] = 0x01;
+    memcpy(&writeBuff[3], &X, 4);
+
+    /*给写入串口进行上锁保护，并写入串口*/
+    std::lock_guard<std::mutex> res_lock_write_uart(mutex_write_uart);
+    WriteBuffer();
+
+    printf("This is Mission1:\n");
+    ShowWriteBuff();
+}
+
+/**
+ * @brief 任务2发送串口模板
+*/
+void Uart_Thread::Mission2_Send(uint32_t X)
+{
+    /*清空写串口缓冲区*/
+    ClearWriteBuff();
+
+    /*为写串口缓冲区赋值*/
+    writeBuff[2] = 0x02;
+    memcpy(&writeBuff[4], &X, 4);
+
+    /*给写入串口进行上锁保护，并写入串口*/
+    std::lock_guard<std::mutex> res_lock_write_uart(mutex_write_uart);
+    WriteBuffer();
+
+    printf("This is Mission2:\n");
+    ShowWriteBuff();
 }
