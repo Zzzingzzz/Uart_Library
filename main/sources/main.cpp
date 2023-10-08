@@ -1,11 +1,4 @@
-#include <iostream>
-
 #include "main.hpp"
-
-#include <sys/time.h> 
-#include <unistd.h>
-
-#include <thread>
 
 using namespace std;
 
