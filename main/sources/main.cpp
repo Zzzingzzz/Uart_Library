@@ -27,11 +27,6 @@ int main()
     thread th1(thread1);
     thread th2(thread2);
 
-    for (int i = 0; i < uart_length; i++)
-    {
-        int a = 0;
-    }
-
     /*主线程休眠*/
     sleep(100000000);
 
