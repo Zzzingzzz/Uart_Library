@@ -23,3 +23,8 @@
 ### main
 
 主函数实现，包括指定打开串口的设备号及串口读写线程的开启
+
+## 推荐串口调试助手
+
+1. cutecom：简单快捷的串口助手，下载方式 `sudo apt-get install cutecom`
+2. vofa+：功能丰富的串口助手，[官网链接](https://www.vofa.plus/)
