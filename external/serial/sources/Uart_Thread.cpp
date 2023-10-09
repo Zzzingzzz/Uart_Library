@@ -2,13 +2,13 @@
 
 /**
  * @brief 读串口线程函数
-*/
+ */
 void Uart_Thread::Thread_Read_Uart()
 {
     while (1)
     {
-        /*是否退出线程*/ 
-        if(this->flag_thread_read_uart == false)
+        /*是否退出线程*/
+        if (this->flag_thread_read_uart == false)
         {
             break;
         }
@@ -26,24 +26,24 @@ void Uart_Thread::Thread_Read_Uart()
 
         /*从队列从获取正确的数据*/
         uint8_t aligned_data[uart_length] = {0};
-        if(GetAlignedFromQueue(aligned_data) != -1)
+        if (GetAlignedFromQueue(aligned_data) != -1)
         {
             /*从队列中获取正确的数据成功*/
-            if(aligned_data[2] == 0x01)
+            if (aligned_data[2] == 0x01)
             {
                 /*任务1*/
                 printf("Receive Mission 1:\n");
                 ShowReadBuff();
-                uint32_t X=0;
+                uint32_t X = 0;
                 memcpy(&X, &aligned_data[3], 4);
                 printf("X:%d\n", X);
             }
-            else if(aligned_data[2] == 0x02)
+            else if (aligned_data[2] == 0x02)
             {
                 /*任务2*/
                 printf("Receive Mission 2:\n");
                 ShowReadBuff();
-                uint32_t X=0;
+                uint32_t X = 0;
                 memcpy(&X, &aligned_data[4], 4);
                 printf("X:%d\n", X);
             }
@@ -58,19 +58,18 @@ void Uart_Thread::Thread_Read_Uart()
             COUT_COLOR_END;
         }
     }
-    
 }
 
 /**
  * @brief 写串口线程函数
-*/
+ */
 void Uart_Thread::Thread_Write_Uart()
 {
-    uint32_t X=0;
-    while(1)
+    uint32_t X = 0;
+    while (1)
     {
-        /*是否退出线程*/ 
-        if(this->flag_thread_write_uart == false)
+        /*是否退出线程*/
+        if (this->flag_thread_write_uart == false)
         {
             break;
         }
@@ -97,7 +96,7 @@ void Uart_Thread::Thread_Write_Uart()
 
 /**
  * @brief 开启读串口线程
-*/
+ */
 void Uart_Thread::Enable_Thread_Read_Uart()
 {
     flag_thread_read_uart = true;
@@ -107,7 +106,7 @@ void Uart_Thread::Enable_Thread_Read_Uart()
 
 /**
  * @brief 开启写串口线程
-*/
+ */
 void Uart_Thread::Enable_Thread_Write_Uart()
 {
     flag_thread_write_uart = true;
@@ -117,7 +116,7 @@ void Uart_Thread::Enable_Thread_Write_Uart()
 
 /**
  * @brief 关闭读串口线程
-*/
+ */
 void Uart_Thread::Disable_Thread_Read_Uart()
 {
     flag_thread_read_uart = false;
@@ -125,7 +124,7 @@ void Uart_Thread::Disable_Thread_Read_Uart()
 
 /**
  * @brief 关闭写串口线程
-*/
+ */
 void Uart_Thread::Disable_Thread_Write_Uart()
 {
     flag_thread_write_uart = false;
@@ -133,7 +132,7 @@ void Uart_Thread::Disable_Thread_Write_Uart()
 
 /**
  * @brief 任务1发送串口模板
-*/
+ */
 void Uart_Thread::Mission1_Send(uint32_t X)
 {
     /*清空写串口缓冲区*/
@@ -153,7 +152,7 @@ void Uart_Thread::Mission1_Send(uint32_t X)
 
 /**
  * @brief 任务2发送串口模板
-*/
+ */
 void Uart_Thread::Mission2_Send(uint32_t X)
 {
     /*清空写串口缓冲区*/

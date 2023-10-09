@@ -19,7 +19,7 @@ int Uart::InitSerialPort(std::string dev)
     int stopbits = 1;   // 停止位
     SetUp(speed, flow_ctrl, databits, stopbits);
 
-    if(fd == -1)
+    if (fd == -1)
     {
         /*打开设备失败*/
         COUT_RED_START;
@@ -64,7 +64,7 @@ int Uart::WriteBuffer()
 void Uart::ShowReadBuff()
 {
     printf("readBuff: ");
-    for(size_t i=0; i<uart_length; i++)
+    for (size_t i = 0; i < uart_length; i++)
         printf("%x ", readBuff[i]);
     printf("\n");
 }
@@ -75,14 +75,14 @@ void Uart::ShowReadBuff()
 void Uart::ShowWriteBuff()
 {
     printf("writeBuff: ");
-    for(size_t i=0; i<uart_length; i++)
+    for (size_t i = 0; i < uart_length; i++)
         printf("%x ", writeBuff[i]);
     printf("\n");
 }
 
 /**
  * @brief 清空writeBuff并加上头尾帧
-*/
+ */
 void Uart::ClearWriteBuff()
 {
     /*清空*/
@@ -93,12 +93,12 @@ void Uart::ClearWriteBuff()
     writeBuff[1] = '!';
 
     /*尾帧*/
-    writeBuff[uart_length-1] = '!';
+    writeBuff[uart_length - 1] = '!';
 }
 
 /**
  * @brief 使用 select 函数堵塞,监听串口文件描述符的可读事件
-*/
+ */
 void Uart::Select()
 {
     FD_ZERO(&rfds);
@@ -108,17 +108,17 @@ void Uart::Select()
 
 /**
  * @brief 将收到的串口帧加入队列
-*/
+ */
 void Uart::PushreadBuffToQueue(ssize_t read_length)
 {
-    if(read_length == 0)
+    if (read_length == 0)
     {
-        for(size_t i=0; i<uart_length; i++)
+        for (size_t i = 0; i < uart_length; i++)
             readBuff_queue.push(readBuff[i]);
     }
     else
     {
-        for(size_t i=0; i<read_length; i++)
+        for (size_t i = 0; i < read_length; i++)
             readBuff_queue.push(readBuff[i]);
     }
 }
@@ -127,18 +127,18 @@ void Uart::PushreadBuffToQueue(ssize_t read_length)
  * @brief 从队列中提取对齐好的数据
  * @param *pData 提取到的数据的数组指针
  * @return -1表示提取失败，其他表示提取成功
-*/
+ */
 int8_t Uart::GetAlignedFromQueue(uint8_t *pData)
 {
     /*判断队列长度与数据帧长度*/
-    while(uart_length <= readBuff_queue.size())
+    while (uart_length <= readBuff_queue.size())
     {
-        if(readBuff_queue[0] == '?' && 
+        if (readBuff_queue[0] == '?' &&
             readBuff_queue[1] == '!' &&
-            readBuff_queue[uart_length-1] == '!')
+            readBuff_queue[uart_length - 1] == '!')
         {
-            /*队列中存在合法数据，赋值并返回*/ 
-            for(uint8_t i=0; i<uart_length; i++)
+            /*队列中存在合法数据，赋值并返回*/
+            for (uint8_t i = 0; i < uart_length; i++)
             {
                 pData[i] = readBuff_queue.pop();
             }
@@ -161,35 +161,39 @@ int8_t Uart::GetAlignedFromQueue(uint8_t *pData)
  */
 void Uart::OpenPort(std::string dev)
 {
-    const char* _dev = new char[32];
+    const char *_dev = new char[32];
     _dev = dev.c_str();
 
-    fd = open(_dev,O_RDWR|O_NDELAY); //读写打开、使I/O变成非搁置模式
-    if(fd == -1){
+    fd = open(_dev, O_RDWR | O_NDELAY); // 读写打开、使I/O变成非搁置模式
+    if (fd == -1)
+    {
         COUT_RED_START;
         printf("connect fail!\n");
         perror("Can't Open Serial Port");
         COUT_COLOR_END;
-        return ;
+        return;
     }
 
-    //判断串口的状态是否为阻塞状态 
-    //fcntl()针对(文件)描述符提供控制.参数fd是被参数cmd操作，这里的参数指“设置文件状态标记“
-    if(fcntl(fd, F_SETFL, 0) == -1 ){ //<0
+    // 判断串口的状态是否为阻塞状态
+    // fcntl()针对(文件)描述符提供控制.参数fd是被参数cmd操作，这里的参数指“设置文件状态标记“
+    if (fcntl(fd, F_SETFL, 0) == -1)
+    { //<0
         COUT_RED_START;
-		perror("fcntl failed!");
+        perror("fcntl failed!");
         COUT_COLOR_END;
-        return ;
-    } else {
+        return;
+    }
+    else
+    {
         COUT_GREEN_START;
         printf("serial is available.\n");
         COUT_COLOR_END;
     }
 
     int DTR_flag;
-    DTR_flag = TIOCM_DTR; //TIOCM_DTR表示终端设备已经准备好
-    ioctl(fd,TIOCMBIS,&DTR_flag);//Set RTS pin
-    return ;
+    DTR_flag = TIOCM_DTR;           // TIOCM_DTR表示终端设备已经准备好
+    ioctl(fd, TIOCMBIS, &DTR_flag); // Set RTS pin
+    return;
 }
 
 /**
@@ -201,94 +205,103 @@ void Uart::OpenPort(std::string dev)
  */
 void Uart::SetUp(int speed, int flow_ctrl, int databits, int stopbits)
 {
-    struct termios options; 
+    struct termios options;
     /*tcgetattr(fd,&options)得到与fd指向对象的相关参数，并将它们保存于options，
     该函数还可以测试配置是否正确，该串口是否可用等。
     若调用成功，函数返回值为0，若调用失败，函数返回值为1。
     */
-    if(tcgetattr(fd, &options)){ 
-        perror("SetupSerial error 1 "); 
-        return ; 
+    if (tcgetattr(fd, &options))
+    {
+        perror("SetupSerial error 1 ");
+        return;
     }
 
     /*波特率*/
     int speed_arr[] = {B9600, B19200, B115200, B1000000};
-    int name_arr[]  = {9600, 19200, 115200, 1000000};    
+    int name_arr[] = {9600, 19200, 115200, 1000000};
 
-    //设置串口输入波特率和输出波特率  
-	for(size_t i = 0; i < sizeof(speed_arr) / sizeof(int); i++)  {  
-		if(speed == name_arr[i]){               
-			cfsetispeed(&options, speed_arr[i]);   
-			cfsetospeed(&options, speed_arr[i]);    
-		}  
-	}
-
-    //修改控制模式，保证程序不会占用串口  
-    options.c_cflag |= CLOCAL;  
-    //修改控制模式，使得能够从串口中读取输入数据  
-    options.c_cflag |= CREAD; 
-
-    //设置数据流控制  
-    switch(flow_ctrl){  
-		case 0 ://不使用流控制  
-            options.c_cflag &= ~CRTSCTS;  //默认
-            break;     
-		case 1 ://使用硬件流控制  
-            options.c_cflag |= CRTSCTS;  
-            break;  
-		case 2 ://使用软件流控制  
-            options.c_cflag |= IXON | IXOFF | IXANY;  
-            break;  
+    // 设置串口输入波特率和输出波特率
+    for (size_t i = 0; i < sizeof(speed_arr) / sizeof(int); i++)
+    {
+        if (speed == name_arr[i])
+        {
+            cfsetispeed(&options, speed_arr[i]);
+            cfsetospeed(&options, speed_arr[i]);
+        }
     }
 
-    //使用数据位掩码清空数据位设置 
+    // 修改控制模式，保证程序不会占用串口
+    options.c_cflag |= CLOCAL;
+    // 修改控制模式，使得能够从串口中读取输入数据
+    options.c_cflag |= CREAD;
+
+    // 设置数据流控制
+    switch (flow_ctrl)
+    {
+    case 0:                          // 不使用流控制
+        options.c_cflag &= ~CRTSCTS; // 默认
+        break;
+    case 1: // 使用硬件流控制
+        options.c_cflag |= CRTSCTS;
+        break;
+    case 2: // 使用软件流控制
+        options.c_cflag |= IXON | IXOFF | IXANY;
+        break;
+    }
+
+    // 使用数据位掩码清空数据位设置
     options.c_cflag &= ~CSIZE;
-    //设置数据位    
-    switch (databits){    
-		case 5:  
-            options.c_cflag |= CS5;  
-            break;  
-		case 6:  
-            options.c_cflag |= CS6;  
-            break;  
-		case 7:      
-            options.c_cflag |= CS7;  
-            break;  
-		case 8:      
-            options.c_cflag |= CS8;  //默认
-            break;    
-		default:     
-            fprintf(stderr,"Unsupported data size\n");  
-            return ;   
+    // 设置数据位
+    switch (databits)
+    {
+    case 5:
+        options.c_cflag |= CS5;
+        break;
+    case 6:
+        options.c_cflag |= CS6;
+        break;
+    case 7:
+        options.c_cflag |= CS7;
+        break;
+    case 8:
+        options.c_cflag |= CS8; // 默认
+        break;
+    default:
+        fprintf(stderr, "Unsupported data size\n");
+        return;
     }
 
-    // 设置停止位   
-    switch(stopbits){    
-		case 1:     
-            options.c_cflag &= ~CSTOPB; break; //默认
-		case 2:     
-            options.c_cflag |= CSTOPB; break;
-		default:     
-            fprintf(stderr,"Unsupported stop bits\n");
-            return ;
-    } 
+    // 设置停止位
+    switch (stopbits)
+    {
+    case 1:
+        options.c_cflag &= ~CSTOPB;
+        break; // 默认
+    case 2:
+        options.c_cflag |= CSTOPB;
+        break;
+    default:
+        fprintf(stderr, "Unsupported stop bits\n");
+        return;
+    }
 
-    //修改输出模式，原始数据输出
+    // 修改输出模式，原始数据输出
     options.c_oflag &= ~OPOST;
 
     options.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
     options.c_iflag &= ~(BRKINT | ICRNL | INPCK | ISTRIP | IXON);
 
-    //设置等待时间和最小接收字符  
-    options.c_cc[VTIME] = 1; /* 读取一个字符等待1*(1/10)s */    
-    options.c_cc[VMIN] = 1; /* 读取字符的最少个数为1 */  
-    //如果发生数据溢出，接收数据，但是不再读取 刷新收到的数据但是不读  
-    tcflush(fd,TCIFLUSH);
+    // 设置等待时间和最小接收字符
+    options.c_cc[VTIME] = 1; /* 读取一个字符等待1*(1/10)s */
+    options.c_cc[VMIN] = 1;  /* 读取字符的最少个数为1 */
+    // 如果发生数据溢出，接收数据，但是不再读取 刷新收到的数据但是不读
+    tcflush(fd, TCIFLUSH);
 
-    //激活配置 (将修改后的termios数据设置到串口中）
-    if (tcsetattr(fd,TCSANOW,&options) != 0) {
-        perror("serial parameter set error!"); 
-        return ; 
+    // 激活配置 (将修改后的termios数据设置到串口中）
+    if (tcsetattr(fd, TCSANOW, &options) != 0)
+    {
+        perror("serial parameter set error!");
+        return;
     }
-    return ; 
+    return;
 }

@@ -14,7 +14,7 @@ void thread2();
 int main()
 {
     // uart初始化
-    uart.InitSerialPort("/dev/pts/4");
+    uart.InitSerialPort("/dev/ttyUSB0");
 
     // 开启读写串口线程
     uart.Enable_Thread_Read_Uart();
@@ -27,6 +27,11 @@ int main()
     thread th1(thread1);
     thread th2(thread2);
 
+    for (int i = 0; i < uart_length; i++)
+    {
+        int a = 0;
+    }
+
     /*主线程休眠*/
     sleep(100000000);
 
@@ -36,8 +41,8 @@ int main()
 /*任务1*/
 void thread1()
 {
-    uint32_t X=0;
-    while(1)
+    uint32_t X = 0;
+    while (1)
     {
         X++;
         // to do ...
@@ -46,15 +51,15 @@ void thread1()
         uart.Mission1_Send(X);
 
         /*睡眠4s*/
-        sleep(4); 
+        sleep(4);
     }
 }
 
 /*任务2*/
 void thread2()
 {
-    uint32_t X=0;
-    while(1)
+    uint32_t X = 0;
+    while (1)
     {
         X++;
         // to do ...
@@ -63,6 +68,6 @@ void thread2()
         uart.Mission2_Send(X);
 
         /*睡眠2s*/
-        sleep(2); 
+        sleep(2);
     }
 }
