@@ -18,9 +18,9 @@ private:
     std::mutex mutex_write_uart;
 
     /*是否开启读串口线程*/
-    bool flag_thread_read_uart = false;
+    volatile bool flag_thread_read_uart = false;
     /*是否开启写串口线程*/
-    bool flag_thread_write_uart = false;
+    volatile bool flag_thread_write_uart = false;
 
     /**
      * @brief 读串口线程函数
