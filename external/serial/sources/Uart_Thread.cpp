@@ -19,7 +19,9 @@ void Uart_Thread::Thread_Read_Uart()
         /*堵塞读取串口*/
         ssize_t read_length = ReadBuffer();
 
+#if enable_show_read
         printf("read length %ld\n", read_length);
+#endif
 
         /*读取到串口后将数据送入队列*/
         PushreadBuffToQueue(read_length);
@@ -32,20 +34,24 @@ void Uart_Thread::Thread_Read_Uart()
             if (aligned_data[2] == 0x01)
             {
                 /*任务1*/
-                printf("Receive Mission 1:\n");
-                ShowReadBuff();
                 uint32_t X = 0;
                 memcpy(&X, &aligned_data[3], 4);
+#if enable_show_read
                 printf("X:%d\n", X);
+                printf("Receive Mission 1:\n");
+                ShowReadBuff();
+#endif
             }
             else if (aligned_data[2] == 0x02)
             {
                 /*任务2*/
-                printf("Receive Mission 2:\n");
-                ShowReadBuff();
                 uint32_t X = 0;
                 memcpy(&X, &aligned_data[4], 4);
+#if enable_show_read
                 printf("X:%d\n", X);
+                printf("Receive Mission 2:\n");
+                ShowReadBuff();
+#endif
             }
         }
         else
@@ -87,7 +93,9 @@ void Uart_Thread::Thread_Write_Uart()
         std::lock_guard<std::mutex> res_lock_write_uart(mutex_write_uart);
         WriteBuffer();
 
+#if enable_show_write
         ShowWriteBuff();
+#endif
 
         // 休眠100ms
         usleep(100000);
@@ -131,41 +139,33 @@ void Uart_Thread::Disable_Thread_Write_Uart()
 }
 
 /**
- * @brief 任务1发送串口模板
+ * @brief 任务1赋值串口模板函数
+ *
+ * @param uart_ptr 赋值的串口
+ * @param X 任务1执行完毕后的数据
  */
-void Uart_Thread::Mission1_Send(uint32_t X)
+void Uart_Thread_Space::Mission1_Assignment(Uart_Thread *uart_ptr, uint32_t X)
 {
-    /*清空写串口缓冲区*/
-    ClearWriteBuff();
+    printf("Mission1 Send!\n");
 
     /*为写串口缓冲区赋值*/
-    writeBuff[2] = 0x01;
-    memcpy(&writeBuff[3], &X, 4);
-
-    /*给写入串口进行上锁保护，并写入串口*/
-    std::lock_guard<std::mutex> res_lock_write_uart(mutex_write_uart);
-    WriteBuffer();
-
-    printf("This is Mission1:\n");
-    ShowWriteBuff();
+    uart_ptr->writeBuff[2] = 0x01;
+    memcpy(&uart_ptr->writeBuff[3], &X, 4);
 }
 
 /**
- * @brief 任务2发送串口模板
+ * @brief 任务2赋值串口模板函数
+ *
+ * @param uart_ptr 赋值的串口
+ * @param X 任务2执行完毕后的数据
+ * @param Y 任务2执行完毕后的数据
  */
-void Uart_Thread::Mission2_Send(uint32_t X)
+void Uart_Thread_Space::Mission2_Assignment(Uart_Thread *uart_ptr, uint16_t X, float Y)
 {
-    /*清空写串口缓冲区*/
-    ClearWriteBuff();
+    printf("Mission2 Send!\n");
 
     /*为写串口缓冲区赋值*/
-    writeBuff[2] = 0x02;
-    memcpy(&writeBuff[4], &X, 4);
-
-    /*给写入串口进行上锁保护，并写入串口*/
-    std::lock_guard<std::mutex> res_lock_write_uart(mutex_write_uart);
-    WriteBuffer();
-
-    printf("This is Mission2:\n");
-    ShowWriteBuff();
+    uart_ptr->writeBuff[2] = 0x02;
+    memcpy(&uart_ptr->writeBuff[3], &X, 2);
+    memcpy(&uart_ptr->writeBuff[5], &Y, 4);
 }
