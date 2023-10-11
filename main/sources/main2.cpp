@@ -1,3 +1,14 @@
+/**
+ * @file main2.cpp
+ * @author your name (you@domain.com)
+ * @brief 没啥卵用的测试代码
+ * @version 0.1
+ * @date 2023-10-12
+ *
+ * @copyright Copyright (c) 2023
+ *
+ */
+
 // #include <stdio.h>      /*标准输入输出定义*/
 // #include <stdlib.h>     /*标准函数库定义*/
 // #include <unistd.h>     /*Unix 标准函数定义*/
@@ -63,21 +74,54 @@
 
 #include "main.hpp"
 
-using namespace std;
-
-// 串口线程结构体
 Uart_Thread uart;
+
+void mission_assignment(Uart_Thread *uart_ptr, uint32_t X)
+{
+    /*为写串口缓冲区赋值*/
+    uart_ptr->writeBuff[2] = 0x01;
+    memcpy(&uart_ptr->writeBuff[3], &X, 4);
+
+    printf("hello1\n");
+}
+
+class Fork
+{
+public:
+    /**
+     * @brief 任务发送串口模板函数
+     *
+     * @tparam Args 函数指针的参数
+     * @param assignment_func 为writeBuff赋值的函数
+     * @param args assignment_func的参数
+     */
+    template <typename... Args>
+    void Mission222_Send(void (*Assignment_Func)(Uart_Thread *, Args...), Uart_Thread *res_uart, Args... args);
+};
+
+template <typename... Args>
+void Fork::Mission222_Send(void (*Assignment_Func)(Uart_Thread *, Args...), Uart_Thread *res_uart, Args... args)
+{
+    // /*清空写串口缓冲区*/
+    // ClearWriteBuff();
+
+    /*为写串口缓冲区赋值*/
+    Assignment_Func(res_uart, args...);
+
+    printf("hello2\n");
+
+    // /*给写入串口进行上锁保护，并写入串口*/
+    // std::lock_guard<std::mutex> res_lock_write_uart(mutex_write_uart);
+    // WriteBuffer();
+}
+
+Fork forkew;
 
 int main()
 {
-    // uart初始化
-    uart.InitSerialPort("/dev/pts/5");
+    int X = 32;
 
-    // 开启读写串口线程
-    uart.Enable_Thread_Read_Uart();
-    // uart.Enable_Thread_Write_Uart();
+    uart.Mission_Send(mission_assignment, &uart, (uint32_t)X);
 
-    sleep(100000000);
-
-    return 0;
+    forkew.Mission222_Send(mission_assignment, &uart, (uint32_t)X);
 }
