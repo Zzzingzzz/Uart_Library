@@ -5,6 +5,8 @@
 
 #include <thread>
 
+#include <math.h>
+
 #include "Uart.hpp"
 #include "Uart_Thread.hpp"
 

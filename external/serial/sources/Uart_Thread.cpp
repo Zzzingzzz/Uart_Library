@@ -139,6 +139,40 @@ void Uart_Thread::Disable_Thread_Write_Uart()
 }
 
 /**
+ * @brief 发送兼容Vofa JustFloat协议的串口数据
+ *
+ * @param data 待发送的浮点数数据
+ */
+void Uart_Thread::Mission_Send_Vofa_JustFloat(std::vector<float> data)
+{
+    /*转换Vofa JustFloat协议*/
+    const size_t data_size = data.size();
+    uint8_t res_writeBuff[4 * (data_size + 1)] = {0};
+    for (size_t i = 0; i < data_size; i++)
+    {
+        memcpy(&res_writeBuff[4 * i], &data[i], 4);
+    }
+    res_writeBuff[4 * data_size] = 0x00;
+    res_writeBuff[4 * data_size + 1] = 0x00;
+    res_writeBuff[4 * data_size + 2] = 0x80;
+    res_writeBuff[4 * data_size + 3] = 0x7f;
+
+#if enable_show_write
+    printf("Mission Vofa Send:");
+    for (size_t i = 0; i < 4 * (data_size + 1); i++)
+    {
+        printf("%x ", res_writeBuff[i]);
+    }
+    printf("\n");
+#endif
+
+    /*给写入串口进行上锁保护*/
+    std::lock_guard<std::mutex> res_lock_write_uart(mutex_write_uart);
+
+    WriteVofaJustFloat(res_writeBuff, 4 * (data_size + 1));
+}
+
+/**
  * @brief 任务1赋值串口模板函数
  *
  * @param uart_ptr 赋值的串口

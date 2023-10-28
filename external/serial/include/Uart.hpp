@@ -58,6 +58,15 @@ public:
     int WriteBuffer();
 
     /**
+     * @brief 发送兼容Vofa JustFloat协议的串口数据
+     *
+     * @param pData 待发送的浮点数数据
+     * @param data_size 待发送的浮点数数据长度
+     * @return int -1表示发送失败，其他表示发送成功
+     */
+    int WriteVofaJustFloat(uint8_t *pData, size_t data_size);
+
+    /**
      * @brief 打印读到的串口
      */
     void ShowReadBuff();

@@ -5,6 +5,7 @@
 
 #include <thread> /*多线程*/
 #include <mutex>  /*互斥锁*/
+#include <vector> /*容器*/
 
 class Uart_Thread : public Uart
 {
@@ -87,6 +88,13 @@ public:
         ShowWriteBuff();
 #endif
     }
+
+    /**
+     * @brief 发送兼容Vofa JustFloat协议的串口数据
+     *
+     * @param data 待发送的浮点数数据
+     */
+    void Mission_Send_Vofa_JustFloat(std::vector<float> data);
 };
 
 /**

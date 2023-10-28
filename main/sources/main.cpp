@@ -38,8 +38,27 @@ int main()
     thread th1(thread1);
     thread th2(thread2);
 
-    /*主线程休眠*/
-    sleep(100000000);
+    // /*主线程休眠*/
+    // sleep(100000000);
+
+    /*此处给出使用Vofa JustFloat协议的方法*/
+    float tt = 0;
+    while (1)
+    {
+        tt += 0.1;
+
+        /*建立四条曲线*/
+        std::vector<float> datas;
+        datas.push_back(sin(tt));
+        datas.push_back(sin(2 * tt));
+        datas.push_back(sin(3 * tt));
+        datas.push_back(sin(4 * tt));
+
+        /*发送vofa数据*/
+        uart.Mission_Send_Vofa_JustFloat(datas);
+
+        usleep(100000);
+    }
 
     return 0;
 }
