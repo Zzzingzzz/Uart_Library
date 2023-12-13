@@ -53,9 +53,9 @@ int Uart::ReadBuffer()
 /**
  * @brief 写串口
  */
-int Uart::WriteBuffer()
+int Uart::WriteBuffer(uint8_t *writeBuff)
 {
-    return write(fd, &writeBuff, uart_length);
+    return write(fd, writeBuff, uart_length);
 }
 
 /**

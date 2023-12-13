@@ -1,6 +1,31 @@
 #include "Uart_Thread.hpp"
 
 /**
+ * @brief Construct a new Uart_Thread object
+ *
+ * @param uart_port 串口端口
+ * @param enable_thread_read 是否开启读串口线程，默认不开启
+ * @param enable_thread_write 是否开启写串口线程，默认不开启
+ */
+Uart_Thread::Uart_Thread(std::string uart_port, bool enable_thread_read, bool enable_thread_write)
+{
+    // 串口初始化
+    InitSerialPort(uart_port);
+
+    // 开启读串口线程
+    if (enable_thread_read)
+    {
+        Enable_Thread_Read_Uart();
+    }
+
+    // 开启写串口线程
+    if (enable_thread_write)
+    {
+        Enable_Thread_Write_Uart();
+    }
+}
+
+/**
  * @brief 读串口线程函数
  */
 void Uart_Thread::Thread_Read_Uart()
@@ -80,25 +105,38 @@ void Uart_Thread::Thread_Write_Uart()
             break;
         }
 
-        /*清空写串口缓冲区*/
-        ClearWriteBuff();
+        std::queue<uint8_t> local_writeBuff_queue;
+        /*堵塞等待条件变量通知*/
+        {
+            std::unique_lock<std::mutex> lock(mutex_write_uart_queue);
+            cv_write_uart_queue.wait(lock, [this]
+                                     { return !writeBuff_queue.empty(); });
+            local_writeBuff_queue = std::move(writeBuff_queue);
+        }
 
-        /*为写串口缓冲区赋值*/
-        writeBuff[2] = 0x01;
+        /*从队列中获取数据*/
+        while (!local_writeBuff_queue.empty())
+        {
+            uint8_t writeBuff[uart_length] = {0};
+            size_t index = 0;
+            for (index; index < uart_length && !local_writeBuff_queue.empty(); index++)
+            {
+                writeBuff[index] = local_writeBuff_queue.front();
+                local_writeBuff_queue.pop();
+            }
 
-        X++;
-        memcpy(&writeBuff[3], &X, 4);
-
-        /*给写入串口进行上锁保护，并写入串口*/
-        std::lock_guard<std::mutex> res_lock_write_uart(mutex_write_uart);
-        WriteBuffer();
+            if (index == uart_length)
+            {
+                WriteBuffer(writeBuff);
 
 #if enable_show_write
-        ShowWriteBuff();
+                ShowWriteBuff();
 #endif
-
-        // 休眠100ms
-        usleep(100000);
+                float usleep_time = 1000000.0 / send_frequency_hz;
+                // 休眠usleep_time ms
+                usleep(usleep_time);
+            }
+        }
     }
 }
 

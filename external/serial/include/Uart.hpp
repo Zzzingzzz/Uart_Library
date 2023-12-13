@@ -55,7 +55,7 @@ public:
     /**
      * @brief 写串口
      */
-    int WriteBuffer();
+    int WriteBuffer(uint8_t *writeBuff);
 
     /**
      * @brief 发送兼容Vofa JustFloat协议的串口数据

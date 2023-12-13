@@ -3,9 +3,11 @@
 
 #include "Uart.hpp"
 
-#include <thread> /*多线程*/
-#include <mutex>  /*互斥锁*/
-#include <vector> /*容器*/
+#include <thread>             /*多线程*/
+#include <mutex>              /*互斥锁*/
+#include <condition_variable> /*条件变量*/
+#include <vector>             /*容器*/
+#include <queue>              /*队列*/
 
 class Uart_Thread : public Uart
 {
@@ -15,30 +17,30 @@ private:
 /*是否显示原始写串口帧数据*/
 #define enable_show_write true
 
-    /*读串口线程*/
-    std::thread thread_read_uart;
-    /*写串口线程*/
-    std::thread thread_write_uart;
-
-    /*写串口线程锁*/
-    std::mutex mutex_write_uart;
-
-    /*是否开启读串口线程*/
-    volatile bool flag_thread_read_uart = false;
-    /*是否开启写串口线程*/
-    volatile bool flag_thread_write_uart = false;
-
-    /**
-     * @brief 读串口线程函数
-     */
-    void Thread_Read_Uart();
-
-    /**
-     * @brief 写串口线程函数
-     */
-    void Thread_Write_Uart();
+    /*发送频率，单位：Hz*/
+    const float send_frequency_hz = 300.0f;
 
 public:
+    /**
+     * @brief Construct a new Uart_Thread object
+     *
+     */
+    Uart_Thread(){};
+    /**
+     * @brief Construct a new Uart_Thread object
+     *
+     * @param uart_port 串口端口
+     * @param enable_thread_read 是否开启读串口线程，默认不开启
+     * @param enable_thread_write 是否开启写串口线程，默认不开启
+     */
+    Uart_Thread(std::string uart_port, bool enable_thread_read = false, bool enable_thread_write = false);
+
+    /**
+     * @brief Destroy the Uart_Thread object
+     *
+     */
+    ~Uart_Thread(){};
+
     /**
      * @brief 开启读串口线程
      */
@@ -80,8 +82,22 @@ public:
         /*为写串口缓冲区赋值*/
         Assignment_Func(uart_ptr, args...);
 
-        /*写入串口*/
-        WriteBuffer();
+        if (flag_thread_write_uart == false)
+        {
+            /*写入串口*/
+            WriteBuffer(writeBuff);
+        }
+        else
+        {
+            /*给写入串口队列进行上锁保护*/
+            std::lock_guard<std::mutex> res_lock_write_uart_queue(mutex_write_uart_queue);
+
+            for (size_t i = 0; i < uart_length; i++)
+                writeBuff_queue.push(writeBuff[i]);
+
+            /*唤醒写串口线程*/
+            cv_write_uart_queue.notify_one();
+        }
 
 #if enable_show_write
         printf("Mission Send:");
@@ -95,6 +111,36 @@ public:
      * @param data 待发送的浮点数数据
      */
     void Mission_Send_Vofa_JustFloat(std::vector<float> data);
+
+private:
+    /*读串口线程*/
+    std::thread thread_read_uart;
+    /*写串口线程*/
+    std::thread thread_write_uart;
+
+    /*写串口线程锁*/
+    std::mutex mutex_write_uart;
+    /*写串口队列所*/
+    std::mutex mutex_write_uart_queue;
+    /*写串口条件变量*/
+    std::condition_variable cv_write_uart_queue;
+    /*写串口队列*/
+    std::queue<uint8_t> writeBuff_queue;
+
+    /*是否开启读串口线程*/
+    volatile bool flag_thread_read_uart = false;
+    /*是否开启写串口线程*/
+    volatile bool flag_thread_write_uart = false;
+
+    /**
+     * @brief 读串口线程函数
+     */
+    void Thread_Read_Uart();
+
+    /**
+     * @brief 写串口线程函数
+     */
+    void Thread_Write_Uart();
 };
 
 /**
