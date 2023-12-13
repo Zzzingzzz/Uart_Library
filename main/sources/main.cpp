@@ -14,7 +14,7 @@
 using namespace std;
 
 // 串口线程结构体
-Uart_Thread uart;
+Uart_Thread uart("/dev/ttyUSB0", true, true);
 
 /*任务1*/
 void thread1();
@@ -24,12 +24,6 @@ void thread2();
 
 int main()
 {
-    // uart初始化
-    uart.InitSerialPort("/dev/ttyUSB0");
-
-    // 开启读写串口线程
-    uart.Enable_Thread_Read_Uart();
-
     /*写串口方法一：开始写串口线程，在while1中一直发送信息，但会占用较多系统资源*/
     // uart.Enable_Thread_Write_Uart();
 
