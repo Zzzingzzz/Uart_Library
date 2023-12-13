@@ -114,6 +114,15 @@ void Uart_Thread::Thread_Write_Uart()
             local_writeBuff_queue = std::move(writeBuff_queue);
         }
 
+        /*频率不匹配检测，如果队列溢出（待发送串口数据超过1s）则认为不匹配*/
+        if (local_writeBuff_queue.size() >= send_frequency_hz)
+        {
+            COUT_RED_START;
+            std::cerr << "Uart Send Frequency isn't Match! The Queue is Overflow!!" << std::endl;
+            COUT_COLOR_END;
+            std::exit(1);
+        }
+
         /*从队列中获取数据*/
         while (!local_writeBuff_queue.empty())
         {
