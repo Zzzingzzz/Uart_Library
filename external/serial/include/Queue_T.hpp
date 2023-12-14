@@ -4,7 +4,7 @@
 #include <iostream>
 
 // 队列中最长长度
-#define QUEUE_MAX_LENGTH 50
+#define QUEUE_MAX_LENGTH 100
 
 // 队列中数据元素的数据类型
 typedef uint8_t queue_data_t;

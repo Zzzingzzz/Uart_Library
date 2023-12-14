@@ -23,7 +23,7 @@ class Uart
 {
 private:
 /*每帧数据长度*/
-#define uart_length 10
+#define uart_length 20
 
     /*串口编号*/
     int fd = -1;

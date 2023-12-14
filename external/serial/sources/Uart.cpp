@@ -13,7 +13,7 @@ int Uart::InitSerialPort(std::string dev)
 
     OpenPort(dev);
 
-    int speed = 115200; // 波特率
+    int speed = 230400; // 波特率
     int flow_ctrl = 0;  // 流控制
     int databits = 8;   // 数据位
     int stopbits = 1;   // 停止位

@@ -18,7 +18,7 @@ private:
 #define enable_show_write true
 
     /*发送频率，单位：Hz*/
-    const float send_frequency_hz = 300.0f;
+    const float send_frequency_hz = 1200.0f;
 
 public:
     /**
@@ -172,6 +172,11 @@ namespace Uart_Thread_Space
      * @param Y 任务2执行完毕后的数据
      */
     void Mission2_Assignment(Uart_Thread *uart_ptr, uint16_t X, float Y);
+
+    void Mission_test(Uart_Thread *uart_ptr, float X);
+
 };
+
+
 
 #endif

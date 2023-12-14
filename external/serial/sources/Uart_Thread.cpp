@@ -30,6 +30,8 @@ Uart_Thread::Uart_Thread(std::string uart_port, bool enable_thread_read, bool en
  */
 void Uart_Thread::Thread_Read_Uart()
 {
+    int read_count = 0;
+
     while (1)
     {
         /*是否退出线程*/
@@ -51,6 +53,8 @@ void Uart_Thread::Thread_Read_Uart()
         /*读取到串口后将数据送入队列*/
         PushreadBuffToQueue(read_length);
 
+        printf("queue size %d\n", readBuff_queue.size());
+
         /*从队列从获取正确的数据*/
         uint8_t aligned_data[uart_length] = {0};
         if (GetAlignedFromQueue(aligned_data) != -1)
@@ -59,34 +63,39 @@ void Uart_Thread::Thread_Read_Uart()
             if (aligned_data[2] == 0x01)
             {
                 /*任务1*/
-                uint32_t X = 0;
+                float X = 0;
                 memcpy(&X, &aligned_data[3], 4);
+
+                read_count++; // 每读取一次增加计数
+                COUT_GREEN_START;
+                printf("Read count: %d Read X: %f\n", read_count,                             X); // 打印读取次数
+                COUT_COLOR_END;
 #if enable_show_read
                 printf("X:%d\n", X);
                 printf("Receive Mission 1:\n");
                 ShowReadBuff();
 #endif
             }
-            else if (aligned_data[2] == 0x02)
-            {
-                /*任务2*/
-                uint32_t X = 0;
-                memcpy(&X, &aligned_data[4], 4);
-#if enable_show_read
-                printf("X:%d\n", X);
-                printf("Receive Mission 2:\n");
-                ShowReadBuff();
-#endif
-            }
-        }
-        else
-        {
-            /*从队列中获取正确的数据失败*/
+//             else if (aligned_data[2] == 0x02)
+//             {
+//                 /*任务2*/
+//                 uint32_t X = 0;
+//                 memcpy(&X, &aligned_data[4], 4);
+// #if enable_show_read
+//                 printf("X:%d\n", X);
+//                 printf("Receive Mission 2:\n");
+//                 ShowReadBuff();
+// #endif
+//             }
+//         }
+//         else
+//         {
+//             /*从队列中获取正确的数据失败*/
 
-            /*打印错误数据*/
-            COUT_RED_START;
-            ShowReadBuff();
-            COUT_COLOR_END;
+//             /*打印错误数据*/
+//             COUT_RED_START;
+//             ShowReadBuff();
+//             COUT_COLOR_END;
         }
     }
 }
@@ -249,4 +258,12 @@ void Uart_Thread_Space::Mission2_Assignment(Uart_Thread *uart_ptr, uint16_t X, f
     uart_ptr->writeBuff[2] = 0x02;
     memcpy(&uart_ptr->writeBuff[3], &X, 2);
     memcpy(&uart_ptr->writeBuff[5], &Y, 4);
+}
+void Uart_Thread_Space::Mission_test(Uart_Thread *uart_ptr, float X)
+{
+    std::cout << "Mission test Sent!" << std::endl;
+
+    /*为写串口缓冲区赋值*/
+    uart_ptr->writeBuff[2] = 0x01;
+    memcpy(&uart_ptr->writeBuff[3], &X, 4);
 }

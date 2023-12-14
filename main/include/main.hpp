@@ -6,6 +6,7 @@
 #include <thread>
 
 #include <math.h>
+#include <sys/time.h>
 
 #include "Uart.hpp"
 #include "Uart_Thread.hpp"
