@@ -139,7 +139,7 @@ void Uart_Thread::Thread_Write_Uart()
                 WriteBuffer(writeBuff);
 
 #if enable_show_write
-                ShowWriteBuff();
+                ShowWriteBuff(writeBuff);
 #endif
                 float usleep_time = 1000000.0 / send_frequency_hz;
                 // 休眠usleep_time ms

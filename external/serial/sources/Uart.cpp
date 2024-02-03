@@ -87,10 +87,17 @@ void Uart::ShowReadBuff()
 /**
  * @brief 打印写的串口
  */
-void Uart::ShowWriteBuff()
+void Uart::ShowWriteBuff(uint8_t *writeBuff)
 {
+    if (writeBuff == NULL)
+        return;
+
+    size_t length = sizeof(writeBuff) / sizeof(uint8_t);
+    if (uart_length < length)
+        length = uart_length;
+
     printf("writeBuff: ");
-    for (size_t i = 0; i < uart_length; i++)
+    for (size_t i = 0; i < length; i++)
         printf("%x ", writeBuff[i]);
     printf("\n");
 }

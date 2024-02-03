@@ -101,7 +101,7 @@ public:
 
 #if enable_show_write
         printf("Mission Send:");
-        ShowWriteBuff();
+        ShowWriteBuff(writeBuff);
 #endif
     }
 

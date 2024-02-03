@@ -74,7 +74,7 @@ public:
     /**
      * @brief 打印写的串口
      */
-    void ShowWriteBuff();
+    void ShowWriteBuff(uint8_t *writeBuff);
 
     /**
      * @brief 清空writeBuff并加上头尾帧
