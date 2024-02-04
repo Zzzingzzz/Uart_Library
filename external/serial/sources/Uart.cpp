@@ -92,12 +92,8 @@ void Uart::ShowWriteBuff(uint8_t *writeBuff)
     if (writeBuff == NULL)
         return;
 
-    size_t length = sizeof(writeBuff) / sizeof(uint8_t);
-    if (uart_length < length)
-        length = uart_length;
-
     printf("writeBuff: ");
-    for (size_t i = 0; i < length; i++)
+    for (size_t i = 0; i < uart_length; i++)
         printf("%x ", writeBuff[i]);
     printf("\n");
 }
