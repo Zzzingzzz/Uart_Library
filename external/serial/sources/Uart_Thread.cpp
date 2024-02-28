@@ -3,6 +3,15 @@
 /**
  * @brief Construct a new Uart_Thread object
  *
+ */
+Uart_Thread::Uart_Thread()
+{
+    thread_check_serial = std::thread(&Uart_Thread::Thread_Check_Serial, this);
+}
+
+/**
+ * @brief Construct a new Uart_Thread object
+ *
  * @param uart_port 串口端口
  * @param enable_thread_read 是否开启读串口线程，默认不开启
  * @param enable_thread_write 是否开启写串口线程，默认不开启
@@ -23,6 +32,8 @@ Uart_Thread::Uart_Thread(std::string uart_port, bool enable_thread_read, bool en
     {
         Enable_Thread_Write_Uart();
     }
+
+    thread_check_serial = std::thread(&Uart_Thread::Thread_Check_Serial, this);
 }
 
 /**
@@ -217,6 +228,45 @@ void Uart_Thread::Mission_Send_Vofa_JustFloat(std::vector<float> data)
     std::lock_guard<std::mutex> res_lock_write_uart(mutex_write_uart);
 
     WriteVofaJustFloat(res_writeBuff, 4 * (data_size + 1));
+}
+
+/**
+ * @brief 检测串口是否在线线程
+ *
+ */
+void Uart_Thread::Thread_Check_Serial()
+{
+    while (1)
+    {
+        if (fd == -1)
+        {
+            sleep(1);
+            continue;
+        }
+
+        volatile bool isSerialPortOnline = IsSerialPortOnline();
+
+        if (isSerialPortOnline == false)
+        {
+            Disable_Thread_Write_Uart();
+            Disable_Thread_Read_Uart();
+
+            sleep(1);
+
+            COUT_RED_START;
+            std::cerr << "Uart Select Error!" << std::endl;
+            COUT_COLOR_END;
+
+            /**
+             * 暂时没找到优雅的方法，从子线程中退出整个程序
+             * 故通过异常指针退出程序
+             */
+            int *p = NULL;
+            *p = 0;
+        }
+
+        sleep(1);
+    }
 }
 
 /**

@@ -25,6 +25,7 @@ void thread2();
 int main()
 {
     /*写串口方法一：开始写串口线程，在while1中一直发送信息，但会占用较多系统资源*/
+    // uart.InitSerialPort("/dev/ttyUSB0");
     // uart.Enable_Thread_Write_Uart();
 
     /*写串口方法二：在不同的线程任务中，每完成一次任务发送一次串口，

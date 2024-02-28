@@ -11,6 +11,7 @@ int Uart::InitSerialPort(std::string dev)
     printf("SerialPort Connecting ..\n");
     COUT_COLOR_END;
 
+    uart_dev = dev;
     OpenPort(dev);
 
     int speed = 115200; // 波特率
@@ -39,6 +40,18 @@ int Uart::InitSerialPort(std::string dev)
     }
 
     return fd;
+}
+
+/**
+ * @brief 检测串口是否在线
+ *
+ * @return true 在线
+ * @return false 离线
+ */
+bool Uart::IsSerialPortOnline()
+{
+    std::ifstream file(uart_dev.c_str());
+    return file.good();
 }
 
 /**
@@ -117,11 +130,17 @@ void Uart::ClearWriteBuff()
 /**
  * @brief 使用 select 函数堵塞,监听串口文件描述符的可读事件
  */
-void Uart::Select()
+int Uart::Select()
 {
     FD_ZERO(&rfds);
     FD_SET(fd, &rfds);
-    select(fd + 1, &rfds, NULL, NULL, NULL);
+    return select(fd + 1, &rfds, NULL, NULL, NULL);
+}
+int Uart::Select(timeval timeout)
+{
+    FD_ZERO(&rfds);
+    FD_SET(fd, &rfds);
+    return select(fd + 1, &rfds, NULL, NULL, &timeout);
 }
 
 /**

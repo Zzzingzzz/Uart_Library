@@ -9,6 +9,7 @@
 #include <stdint.h> /*标准整数类型*/
 
 #include <iostream> /*标准输入输出定义*/
+#include <fstream>  /*文件输入输出定义*/
 #include <string>   /*对字符串的操作函数和类型定义*/
 #include <cstring>  /*对字符串的操作函数和字符处理函数*/
 
@@ -21,12 +22,15 @@
 
 class Uart
 {
-private:
+protected:
 /*每帧数据长度*/
 #define uart_length 10
 
     /*串口编号*/
     int fd = -1;
+
+    /*串口设备名*/
+    std::string uart_dev;
 
     /*设备描述集合*/
     fd_set rfds;
@@ -46,6 +50,14 @@ public:
      * @return -1表示打开串口失败，其他表示打开成功
      */
     int InitSerialPort(std::string dev);
+
+    /**
+     * @brief 检测串口是否在线
+     *
+     * @return true 在线
+     * @return false 离线
+     */
+    bool IsSerialPortOnline();
 
     /**
      * @brief 读串口
@@ -84,7 +96,8 @@ public:
     /**
      * @brief 使用 select 函数堵塞,监听串口文件描述符的可读事件
      */
-    void Select();
+    int Select();
+    int Select(timeval timeout);
 
     /**
      * @brief 将收到的串口帧加入队列

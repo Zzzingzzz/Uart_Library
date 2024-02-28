@@ -25,7 +25,7 @@ public:
      * @brief Construct a new Uart_Thread object
      *
      */
-    Uart_Thread(){};
+    Uart_Thread();
     /**
      * @brief Construct a new Uart_Thread object
      *
@@ -116,6 +116,8 @@ private:
     std::thread thread_read_uart;
     /*写串口线程*/
     std::thread thread_write_uart;
+    /*检查串口线程*/
+    std::thread thread_check_serial;
 
     /*写串口线程锁*/
     std::mutex mutex_write_uart;
@@ -140,6 +142,12 @@ private:
      * @brief 写串口线程函数
      */
     void Thread_Write_Uart();
+
+    /**
+     * @brief 检测串口是否在线线程
+     *
+     */
+    void Thread_Check_Serial();
 };
 
 /**
