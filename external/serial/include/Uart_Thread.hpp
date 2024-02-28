@@ -67,7 +67,6 @@ public:
      *
      * @tparam Args 函数指针的参数
      * @param Assignment_Func 为writeBuff赋值的函数指针
-     * @param uart_ptr 任务发送串口
      * @param args Assignment_Func的参数
      */
     template <typename... Args>
