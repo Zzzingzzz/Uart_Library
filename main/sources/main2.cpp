@@ -121,7 +121,7 @@ int main()
 {
     int X = 32;
 
-    uart.Mission_Send(mission_assignment, &uart, (uint32_t)X);
+    uart.Mission_Send(mission_assignment, (uint32_t)X);
 
     forkew.Mission222_Send(mission_assignment, &uart, (uint32_t)X);
 }

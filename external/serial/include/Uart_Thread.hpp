@@ -71,7 +71,7 @@ public:
      * @param args Assignment_Func的参数
      */
     template <typename... Args>
-    void Mission_Send(void (*Assignment_Func)(Uart_Thread *, Args...), Uart_Thread *uart_ptr, Args... args)
+    void Mission_Send(void (*Assignment_Func)(Uart_Thread *, Args...), Args... args)
     {
         /*给写入串口进行上锁保护*/
         std::lock_guard<std::mutex> res_lock_write_uart(mutex_write_uart);
@@ -80,7 +80,7 @@ public:
         ClearWriteBuff();
 
         /*为写串口缓冲区赋值*/
-        Assignment_Func(uart_ptr, args...);
+        Assignment_Func(this, args...);
 
         if (flag_thread_write_uart == false)
         {

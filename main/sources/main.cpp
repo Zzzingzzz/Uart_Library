@@ -67,7 +67,7 @@ void thread1()
         // to do ...
 
         /*完成任务1后，发送一次串口，记得赋值时使用强制类型转换保证数据类型一致*/
-        uart.Mission_Send(Uart_Thread_Space::Mission1_Assignment, &uart, (uint32_t)X);
+        uart.Mission_Send(Uart_Thread_Space::Mission1_Assignment, (uint32_t)X);
 
         /*睡眠4s*/
         sleep(4);
@@ -86,7 +86,7 @@ void thread2()
         // to do ...
 
         /*完成任务2后，发送一次串口，记得赋值时使用强制类型转换保证数据类型一致*/
-        uart.Mission_Send(Uart_Thread_Space::Mission2_Assignment, &uart, (uint16_t)X, (float)Y);
+        uart.Mission_Send(Uart_Thread_Space::Mission2_Assignment, (uint16_t)X, (float)Y);
 
         /*睡眠2s*/
         sleep(2);
