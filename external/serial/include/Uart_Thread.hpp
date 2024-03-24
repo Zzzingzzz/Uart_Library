@@ -13,7 +13,7 @@ class Uart_Thread : public Uart
 {
 private:
 /*是否显示原始读串口帧数据*/
-#define enable_show_read false
+#define enable_show_read true
 /*是否显示原始写串口帧数据*/
 #define enable_show_write true
 

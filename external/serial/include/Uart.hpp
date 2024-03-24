@@ -108,7 +108,7 @@ public:
     /**
      * @brief 从队列中提取对齐好的数据
      * @param *pData 提取到的数据的数组指针
-     * @return -1表示提取失败，其他表示提取成功
+     * @return 0表示队列长度不足，-1表示提取失败，1表示提取成功
      */
     int8_t GetAlignedFromQueue(uint8_t *pData);
 

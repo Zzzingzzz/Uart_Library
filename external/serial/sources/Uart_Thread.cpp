@@ -56,6 +56,7 @@ void Uart_Thread::Thread_Read_Uart()
         ssize_t read_length = ReadBuffer();
 
 #if enable_show_read
+        ShowReadBuff();
         printf("read length %ld\n", read_length);
 #endif
 
@@ -64,7 +65,8 @@ void Uart_Thread::Thread_Read_Uart()
 
         /*从队列从获取正确的数据*/
         uint8_t aligned_data[uart_length] = {0};
-        if (GetAlignedFromQueue(aligned_data) != -1)
+        int8_t ret = GetAlignedFromQueue(aligned_data);
+        if (ret == 1)
         {
             /*从队列中获取正确的数据成功*/
             if (aligned_data[2] == 0x01)
@@ -90,7 +92,7 @@ void Uart_Thread::Thread_Read_Uart()
 #endif
             }
         }
-        else
+        else if (ret == -1)
         {
             /*从队列中获取正确的数据失败*/
 

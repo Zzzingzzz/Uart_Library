@@ -1,127 +1,92 @@
 /**
- * @file main2.cpp
- * @author your name (you@domain.com)
- * @brief 没啥卵用的测试代码
- * @version 0.1
+ * @file main.cpp
+ * @author zzzing (1226196281@qq.com)
+ * @brief 串口库主函数，包含一些调用示例
+ * @version 2.1
  * @date 2023-10-12
  *
  * @copyright Copyright (c) 2023
  *
  */
 
-// #include <stdio.h>      /*标准输入输出定义*/
-// #include <stdlib.h>     /*标准函数库定义*/
-// #include <unistd.h>     /*Unix 标准函数定义*/
-// #include <fcntl.h>      /*文件控制定义*/
-// #include <errno.h>      /*错误号定义*/
-// #include <stdint.h>     /*标准整数类型*/
-
-// #include <iostream>     /*标准输入输出定义*/
-// #include <string>       /*对字符串的操作函数和类型定义*/
-// #include <cstring>      /*对字符串的操作函数和字符处理函数*/
-
-// #include <sys/ioctl.h>  /*I/O控制函数*/
-// #include <sys/types.h>  /*基本数据类型*/
-// #include <sys/stat.h>   /*文件状态的结构和常量*/
-// #include <sys/termios.h>    /*PPSIX 终端控制定义*/
-
-// int main() {
-//     int fd;
-//     struct termios options;
-//     fd_set rfds;
-
-//     // 打开串口设备
-//     fd = open("/dev/pts/5", O_RDWR | O_NOCTTY | O_NDELAY);
-//     if (fd < 0) {
-//         perror("open");
-//         return -1;
-//     }
-
-//     // 配置串口参数
-//     tcgetattr(fd, &options);
-//     options.c_cflag = B9600 | CS8 | CLOCAL | CREAD;
-//     options.c_iflag = IGNPAR;
-//     options.c_oflag = 0;
-//     options.c_lflag = 0;
-//     options.c_cc[VTIME] = 0;
-//     options.c_cc[VMIN] = 1;
-//     tcsetattr(fd, TCSANOW, &options);
-
-//     while (1) {
-//         // 使用 select 函数监听串口文件描述符的可读事件
-//         FD_ZERO(&rfds);
-//         FD_SET(fd, &rfds);
-//         select(fd + 1, &rfds, NULL, NULL, NULL);
-
-//         // 读取串口数据
-//         uint8_t buf[10];
-//         int n = read(fd, buf, sizeof(buf));
-//         if (n > 0) {
-//             printf("Received n:%d\n", n);
-//             for(int i=0; i<n; i++)
-//             {
-//                 printf("%x ", buf[i]);
-//             }
-//             printf("\n");
-//         }
-//     }
-
-//     // 关闭串口设备
-//     close(fd);
-
-//     return 0;
-// }
-
 #include "main.hpp"
 
-Uart_Thread uart;
+using namespace std;
 
-void mission_assignment(Uart_Thread *uart_ptr, uint32_t X)
-{
-    /*为写串口缓冲区赋值*/
-    uart_ptr->writeBuff[2] = 0x01;
-    memcpy(&uart_ptr->writeBuff[3], &X, 4);
+// 串口线程结构体
+Uart_Thread uart("/dev/ttyUSB1", true, true);
 
-    printf("hello1\n");
-}
-
-class Fork
-{
-public:
-    /**
-     * @brief 任务发送串口模板函数
-     *
-     * @tparam Args 函数指针的参数
-     * @param assignment_func 为writeBuff赋值的函数
-     * @param args assignment_func的参数
-     */
-    template <typename... Args>
-    void Mission222_Send(void (*Assignment_Func)(Uart_Thread *, Args...), Uart_Thread *res_uart, Args... args);
-};
-
-template <typename... Args>
-void Fork::Mission222_Send(void (*Assignment_Func)(Uart_Thread *, Args...), Uart_Thread *res_uart, Args... args)
-{
-    // /*清空写串口缓冲区*/
-    // ClearWriteBuff();
-
-    /*为写串口缓冲区赋值*/
-    Assignment_Func(res_uart, args...);
-
-    printf("hello2\n");
-
-    // /*给写入串口进行上锁保护，并写入串口*/
-    // std::lock_guard<std::mutex> res_lock_write_uart(mutex_write_uart);
-    // WriteBuffer();
-}
-
-Fork forkew;
+/*任务1*/
+void thread1();
 
 int main()
 {
-    int X = 32;
+    /*写串口方法一：开始写串口线程，在while1中一直发送信息，但会占用较多系统资源*/
+    // uart.InitSerialPort("/dev/ttyUSB0");
+    // uart.Enable_Thread_Write_Uart();
 
-    uart.Mission_Send(mission_assignment, (uint32_t)X);
+    /*写串口方法二：在不同的线程任务中，每完成一次任务发送一次串口，
+      但要记得写发送函数中使用互斥锁，防止多线程间任务串口错位*/
+    thread th1(thread1);
+    // thread th2(thread2);
 
-    forkew.Mission222_Send(mission_assignment, &uart, (uint32_t)X);
+    // /*主线程休眠*/
+    sleep(100000000);
+
+    /*此处给出使用Vofa JustFloat协议的方法*/
+    // float tt = 0;
+    // while (1)
+    // {
+    //     tt += 0.1;
+
+    //     /*建立四条曲线*/
+    //     std::vector<float> datas;
+    //     datas.push_back(sin(tt));
+    //     datas.push_back(sin(2 * tt));
+    //     datas.push_back(sin(3 * tt));
+    //     datas.push_back(sin(4 * tt));
+
+    //     /*发送vofa数据*/
+    //     uart.Mission_Send_Vofa_JustFloat(datas);
+
+    //     usleep(100000);
+    // }
+
+    return 0;
+}
+
+/*任务1*/
+void thread1()
+{
+    int X = 0;
+    while (1)
+    {
+        X++;
+        // to do ...
+
+        /*完成任务1后，发送一次串口，记得赋值时使用强制类型转换保证数据类型一致*/
+        uart.Mission_Send(Uart_Thread_Space::Mission1_Assignment, (uint32_t)X);
+
+        /*睡眠4s*/
+        usleep(2000);
+    }
+}
+
+/*任务2*/
+void thread2()
+{
+    int X = 0;
+    double Y = 0.0;
+    while (1)
+    {
+        X++;
+        Y += 0.2;
+        // to do ...
+
+        /*完成任务2后，发送一次串口，记得赋值时使用强制类型转换保证数据类型一致*/
+        uart.Mission_Send(Uart_Thread_Space::Mission2_Assignment, (uint16_t)X, (float)Y);
+
+        /*睡眠2s*/
+        sleep(2);
+    }
 }

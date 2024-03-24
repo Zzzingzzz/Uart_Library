@@ -163,10 +163,15 @@ void Uart::PushreadBuffToQueue(ssize_t read_length)
 /**
  * @brief 从队列中提取对齐好的数据
  * @param *pData 提取到的数据的数组指针
- * @return -1表示提取失败，其他表示提取成功
+ * @return 0表示队列长度不足，-1表示提取失败，1表示提取成功
  */
 int8_t Uart::GetAlignedFromQueue(uint8_t *pData)
 {
+    if (uart_length > readBuff_queue.size())
+    {
+        return 0;
+    }
+
     /*判断队列长度与数据帧长度*/
     while (uart_length <= readBuff_queue.size())
     {
